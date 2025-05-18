@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  Alert,
+} from 'react-native';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
+// Background flame pattern
 function FlamesPattern() {
-  // Render 'FLAME' text in various positions for a pattern effect
   const flames = [];
   for (let i = 0; i < 20; i++) {
     flames.push(
@@ -19,19 +27,21 @@ function FlamesPattern() {
           color: 'rgba(255,140,0,0.08)',
           fontSize: 32 + Math.random() * 24,
           fontWeight: 'bold',
-          transform: [{ rotate: `${Math.random() * 30 - 15}deg` }],
-        }}
-      >
+          transform: [{rotate: `${Math.random() * 30 - 15}deg`}],
+        }}>
         FLAME
-      </Text>
+      </Text>,
     );
   }
   return <View style={StyleSheet.absoluteFill}>{flames}</View>;
 }
 
-type Props = NativeStackScreenProps<any> & { setIsLoggedIn: (val: boolean) => void };
+// Props type
+type Props = NativeStackScreenProps<any> & {
+  setIsLoggedIn: (val: boolean) => void;
+};
 
-const LoginScreen: React.FC<Props> = ({ navigation, setIsLoggedIn }) => {
+const LoginScreen: React.FC<Props> = ({navigation, setIsLoggedIn}) => {
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,23 +51,32 @@ const LoginScreen: React.FC<Props> = ({ navigation, setIsLoggedIn }) => {
       Alert.alert('Error', 'All fields are required.');
       return;
     }
+
     setLoading(true);
     try {
-      const res = await fetch('http://192.168.1.5:5000/login', {
+      const res = await fetch('http://192.168.1.8:5000/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, password }),
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({code, password}),
       });
+
       const data = await res.json();
-      if (res.ok && data.token) {
+
+      // Debug logs
+      console.log('res.ok:', res.ok);
+      console.log('status:', res.status);
+      console.log('response data:', data);
+
+      if (res.ok && data.token && data.user) {
         await AsyncStorage.setItem('token', data.token);
-        await AsyncStorage.setItem('user', JSON.stringify(data.user)); // <-- Save user object
+        await AsyncStorage.setItem('user', JSON.stringify(data.user));
         setIsLoggedIn(true);
         Alert.alert('Success', 'Login successful.');
       } else {
         Alert.alert('Error', data.message || 'Login failed.');
       }
     } catch (error) {
+      console.error('Login error:', error);
       Alert.alert('Error', 'Network error.');
     } finally {
       setLoading(false);
@@ -85,17 +104,25 @@ const LoginScreen: React.FC<Props> = ({ navigation, setIsLoggedIn }) => {
           onChangeText={setPassword}
           secureTextEntry
         />
-        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-          <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Log In'}</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleLogin}
+          disabled={loading}>
+          <Text style={styles.buttonText}>
+            {loading ? 'Logging in...' : 'Log In'}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.linkText}>Don't have an account? <Text style={styles.link}>Sign Up</Text></Text>
+          <Text style={styles.linkText}>
+            Don't have an account? <Text style={styles.link}>Sign Up</Text>
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
 
+// Styling
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -110,7 +137,7 @@ const styles = StyleSheet.create({
     padding: 28,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 8,
@@ -166,4 +193,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen; 
+export default LoginScreen;

@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert, Image, Platform } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  Alert,
+  Image,
+  Platform,
+} from 'react-native';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import RNFS from 'react-native-fs';
-import { PermissionsAndroid } from 'react-native';
+import {PermissionsAndroid} from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
 function FlamesPattern() {
   const flames = [];
@@ -20,11 +30,10 @@ function FlamesPattern() {
           color: 'rgba(255,140,0,0.08)',
           fontSize: 32 + Math.random() * 24,
           fontWeight: 'bold',
-          transform: [{ rotate: `${Math.random() * 30 - 15}deg` }],
-        }}
-      >
+          transform: [{rotate: `${Math.random() * 30 - 15}deg`}],
+        }}>
         FLAME
-      </Text>
+      </Text>,
     );
   }
   return <View style={StyleSheet.absoluteFill}>{flames}</View>;
@@ -32,7 +41,7 @@ function FlamesPattern() {
 
 type Props = NativeStackScreenProps<any>;
 
-const RegisterScreen: React.FC<Props> = ({ navigation }) => {
+const RegisterScreen: React.FC<Props> = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -47,16 +56,19 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     }
     setLoading(true);
     try {
-      const res = await fetch('http://192.168.1.5:5000/register', {
+      const res = await fetch('http://192.168.1.8:5000/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, phone, password }),
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email, phone, password}),
       });
       const data = await res.json();
       if (res.status === 201) {
         setUserCode(data.code);
         setQr(data.qr);
-        Alert.alert('Success', 'Registration successful! Your unique code is shown below.');
+        Alert.alert(
+          'Success',
+          'Registration successful! Your unique code is shown below.',
+        );
       } else {
         Alert.alert('Error', data.message || 'Registration failed.');
       }
@@ -72,19 +84,24 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     try {
       let granted = true;
       if (Platform.OS === 'android') {
-        granted = (await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: 'Storage Permission',
-            message: 'App needs access to your storage to download the QR code.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        )) === PermissionsAndroid.RESULTS.GRANTED;
+        granted =
+          (await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+            {
+              title: 'Storage Permission',
+              message:
+                'App needs access to your storage to download the QR code.',
+              buttonNeutral: 'Ask Me Later',
+              buttonNegative: 'Cancel',
+              buttonPositive: 'OK',
+            },
+          )) === PermissionsAndroid.RESULTS.GRANTED;
       }
       if (!granted) {
-        Alert.alert('Permission denied', 'Cannot save QR code without storage permission.');
+        Alert.alert(
+          'Permission denied',
+          'Cannot save QR code without storage permission.',
+        );
         return;
       }
       // Remove data:image/png;base64, prefix if present
@@ -134,24 +151,58 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           onChangeText={setPassword}
           secureTextEntry
         />
-        <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-          <Text style={styles.buttonText}>{loading ? 'Registering...' : 'Register'}</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleRegister}
+          disabled={loading}>
+          <Text style={styles.buttonText}>
+            {loading ? 'Registering...' : 'Register'}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.linkText}>Already have an account? <Text style={styles.link}>Back to Login</Text></Text>
+          <Text style={styles.linkText}>
+            Already have an account?{' '}
+            <Text style={styles.link}>Back to Login</Text>
+          </Text>
         </TouchableOpacity>
         {userCode && (
-          <View style={{ alignItems: 'center', marginTop: 24 }}>
-            <Text style={{ color: '#FF8C00', fontWeight: 'bold', fontSize: 16 }}>Your Unique Code:</Text>
-            <Text style={{ color: '#fff', fontSize: 20, marginBottom: 12 }}>{userCode}</Text>
-            <TouchableOpacity style={[styles.button, { marginTop: 0, width: 180, backgroundColor: '#222' }]} onPress={handleCopyCode}>
-              <Text style={[styles.buttonText, { color: '#FF8C00' }]}>Copy Code</Text>
+          <View style={{alignItems: 'center', marginTop: 24}}>
+            <Text style={{color: '#FF8C00', fontWeight: 'bold', fontSize: 16}}>
+              Your Unique Code:
+            </Text>
+            <Text style={{color: '#fff', fontSize: 20, marginBottom: 12}}>
+              {userCode}
+            </Text>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                {marginTop: 0, width: 180, backgroundColor: '#222'},
+              ]}
+              onPress={handleCopyCode}>
+              <Text style={[styles.buttonText, {color: '#FF8C00'}]}>
+                Copy Code
+              </Text>
             </TouchableOpacity>
-            {qr && <Image source={{ uri: qr }} style={{ width: 180, height: 180, backgroundColor: '#fff', borderRadius: 12, marginTop: 10 }} />}
-            <TouchableOpacity style={[styles.button, { marginTop: 12, width: 180 }]} onPress={handleDownloadQR}>
+            {qr && (
+              <Image
+                source={{uri: qr}}
+                style={{
+                  width: 180,
+                  height: 180,
+                  backgroundColor: '#fff',
+                  borderRadius: 12,
+                  marginTop: 10,
+                }}
+              />
+            )}
+            <TouchableOpacity
+              style={[styles.button, {marginTop: 12, width: 180}]}
+              onPress={handleDownloadQR}>
               <Text style={styles.buttonText}>Download QR</Text>
             </TouchableOpacity>
-            <Text style={{ color: '#aaa', marginTop: 8, fontSize: 13 }}>Scan this QR code to login instantly.</Text>
+            <Text style={{color: '#aaa', marginTop: 8, fontSize: 13}}>
+              Scan this QR code to login instantly.
+            </Text>
           </View>
         )}
       </View>
@@ -173,7 +224,7 @@ const styles = StyleSheet.create({
     padding: 28,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 8,
@@ -229,4 +280,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegisterScreen; 
+export default RegisterScreen;
