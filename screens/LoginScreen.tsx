@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Dimensions,
   Alert,
+  Image,
+  ImageBackground,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -84,7 +86,9 @@ const LoginScreen: React.FC<Props> = ({navigation, setIsLoggedIn}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require('../assets/images/2.jpg')}
+      style={styles.container}>
       <FlamesPattern />
       <View style={styles.card}>
         <Text style={styles.brand}>FLAMES</Text>
@@ -118,7 +122,7 @@ const LoginScreen: React.FC<Props> = ({navigation, setIsLoggedIn}) => {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 

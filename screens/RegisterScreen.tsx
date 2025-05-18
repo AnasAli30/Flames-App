@@ -8,11 +8,12 @@ import {
   Dimensions,
   Alert,
   Image,
+  ImageBackground,
   Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import RNFS from 'react-native-fs';
-import {PermissionsAndroid} from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 
 const {width, height} = Dimensions.get('window');
@@ -80,7 +81,7 @@ const RegisterScreen: React.FC<Props> = ({navigation}) => {
   };
 
   const handleDownloadQR = async () => {
-    if (!qr) return;
+    if (!qr || !userCode) return;
     try {
       let granted = true;
       if (Platform.OS === 'android') {
@@ -89,8 +90,7 @@ const RegisterScreen: React.FC<Props> = ({navigation}) => {
             PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
             {
               title: 'Storage Permission',
-              message:
-                'App needs access to your storage to download the QR code.',
+              message: 'App needs access to your storage to download the QR code.',
               buttonNeutral: 'Ask Me Later',
               buttonNegative: 'Cancel',
               buttonPositive: 'OK',
@@ -98,13 +98,9 @@ const RegisterScreen: React.FC<Props> = ({navigation}) => {
           )) === PermissionsAndroid.RESULTS.GRANTED;
       }
       if (!granted) {
-        Alert.alert(
-          'Permission denied',
-          'Cannot save QR code without storage permission.',
-        );
+        Alert.alert('Permission denied', 'Cannot save QR code without storage permission.');
         return;
       }
-      // Remove data:image/png;base64, prefix if present
       const base64 = qr.replace(/^data:image\/\w+;base64,/, '');
       const filePath = `${RNFS.DownloadDirectoryPath}/flames_qr_${userCode}.png`;
       await RNFS.writeFile(filePath, base64, 'base64');
@@ -122,7 +118,9 @@ const RegisterScreen: React.FC<Props> = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require('../assets/images/3.jpg')}
+      style={styles.container}>
       <FlamesPattern />
       <View style={styles.card}>
         <Text style={styles.brand}>FLAMES</Text>
@@ -165,6 +163,7 @@ const RegisterScreen: React.FC<Props> = ({navigation}) => {
             <Text style={styles.link}>Back to Login</Text>
           </Text>
         </TouchableOpacity>
+
         {userCode && (
           <View style={{alignItems: 'center', marginTop: 24}}>
             <Text style={{color: '#FF8C00', fontWeight: 'bold', fontSize: 16}}>
@@ -206,7 +205,7 @@ const RegisterScreen: React.FC<Props> = ({navigation}) => {
           </View>
         )}
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 
@@ -244,7 +243,7 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
-    height: 44,
+    height: 45,
     backgroundColor: '#181818',
     borderRadius: 8,
     paddingHorizontal: 12,
@@ -252,7 +251,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     borderWidth: 1,
     borderColor: '#333',
-    fontSize: 16,
+    fontSize: 17,
   },
   button: {
     width: '100%',
